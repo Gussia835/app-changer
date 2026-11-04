@@ -1,0 +1,29 @@
+package org.Foodcards.factory.entity;
+
+import org.Foodcards.dto.internal.IncomingMessageCommand;
+import org.Foodcards.dto.kafka.GruIncomingDTO;
+import org.Foodcards.models.AppChangerTrans;
+
+import java.time.LocalDateTime;
+
+import static org.Foodcards.utils.Constants.STATUS_NEW;
+
+public class TransEntityFactory {
+    public AppChangerTrans buildTrans(IncomingMessageCommand command) {
+        GruIncomingDTO dto = command.getPayload();
+
+        return AppChangerTrans.builder()
+                .protocolType(command.getProtocolType())
+                .systemId(dto.getSystemId())
+                .requestId(dto.getRequestId())
+                .eventType(dto.getEventType())
+                .reqData(command.getRawJson())
+                .respData(null)
+                .status(STATUS_NEW)
+                .respCode(null)
+                .respDesc(null)
+                .insTs(LocalDateTime.now())
+                .updTs(LocalDateTime.now())
+                .build();
+    }
+}
