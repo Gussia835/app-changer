@@ -1,6 +1,7 @@
 package org.Foodcards.factory.dto;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.Foodcards.dto.internal.BalanceChange;
 import org.Foodcards.dto.internal.ProcedureResult;
 import org.Foodcards.dto.kafka.*;
 
@@ -25,7 +26,7 @@ public class SmartDtoFactory {
 
     public SmartEventDTO buildSmartEvent(GruEventDTO event, ProcedureResult result) {
         if (result.getCode() == 0 && !result.getChanges().isEmpty()) {
-            ProcedureResult.BalanceChange change = result.getChanges().get(0);
+            BalanceChange change = result.getChanges().get(0);
             return SmartEventDTO.builder()
                     .entityValue(event.getSystemAccount())
                     .entityId(event.getId())

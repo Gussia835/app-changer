@@ -14,15 +14,4 @@ public class ProcedureResult {
     private int code;
     private String message;
     private List<BalanceChange> changes;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BalanceChange {
-        private String account;
-        private String oldTbal;
-        private String newTbal;
-        private String operation;
-    }
 }

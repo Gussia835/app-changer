@@ -1,7 +1,8 @@
-package org.Foodcards.service;
+package org.Foodcards.service.in;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.Foodcards.factory.dto.TransDtoFactory;
 import org.Foodcards.dao.AppChangerDao;
@@ -16,15 +17,15 @@ public class IngestionService {
     private final JsonUtil jsonUtil;
     private final TransDtoFactory transDtoFactory;
 
-    public void process(String rawJson) {
+    @Transactional
+    public void process(GruIncomingDTO dto, String rawJson) {
         try {
-            GruIncomingDTO incomingDto = jsonUtil.fromJson(rawJson, GruIncomingDTO.class);
-            IncomingMessageCommand command = transDtoFactory.buildIncomingMessage(rawJson, incomingDto);
-
+            IncomingMessageCommand command = transDtoFactory.buildIncomingMessage(rawJson, dto);
             dao.saveIncomning(command);
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Log.errorf("Не удалось сохранить сообщение requestId=%s в БД", dto.getRequestId(), e);
+            throw new RuntimeException("Ошибка сохранения в БД", e);
         }
     }
 }

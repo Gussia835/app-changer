@@ -1,4 +1,4 @@
-package org.Foodcards.service;
+package org.Foodcards.service.out;
 
 import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
@@ -13,10 +13,7 @@ import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Message;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.Foodcards.utils.Constants.STATUS_ERROR;
 
 @ApplicationScoped
 @RequiredArgsConstructor

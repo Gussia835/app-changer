@@ -1,15 +1,28 @@
 FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
-WORKDIR /work
-COPY . /work
 
-RUN ./gradlew build -Dquarkus.package.type=native --no-daemon
+USER root
+
+WORKDIR /work
+COPY gradlew settings.gradle build.gradle app-changer/gradle.properties ./
+COPY gradle ./gradle
+
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+
+COPY app-changer ./app-changer
+
+RUN chown -R 1001:0 /work && chmod -R g=u /work
+
+USER 1001
+
+RUN ./gradlew :app-changer:build -Dquarkus.package.type=native -x test --no-daemon
 
 FROM quay.io/quarkus/quarkus-micro-image:2.0
+
 WORKDIR /work/
+COPY --from=build /work/app-changer/build/*-runner /work/application
 
-COPY --from=build /work/build/*-runner /work/application
+RUN chmod 775 /work/application
 
-RUN chmod 775 /work
 EXPOSE 8080
 
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

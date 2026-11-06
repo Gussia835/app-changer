@@ -13,9 +13,10 @@ import org.Foodcards.dto.kafka.SmartEventDTO;
 import org.Foodcards.factory.dto.ProcedureDtoFactory;
 import org.Foodcards.factory.dto.SmartDtoFactory;
 import org.Foodcards.processor.MessageProcessor;
-import org.Foodcards.service.ProcedureService;
+import org.Foodcards.service.processing.ProcedureService;
 import org.Foodcards.client.ControllerClient;
 import org.Foodcards.utils.JsonUtil;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class GruMessageProcessor implements MessageProcessor {
     JsonUtil jsonUtil;
 
     @Inject
+    @RestClient
     ControllerClient appController;
 
     @Inject

@@ -1,30 +1,18 @@
-package org.Foodcards.service;
+package org.Foodcards.service.processing;
 
 import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.Foodcards.factory.dto.ProcedureDtoFactory;
 import org.Foodcards.dao.AppChangerDao;
-import org.Foodcards.dto.internal.ProcedureParamsDTO;
 import org.Foodcards.dto.entity.TransactionUpdateDTO;
-import org.Foodcards.dto.kafka.GruEventDTO;
-import org.Foodcards.dto.kafka.GruIncomingDTO;
-import org.Foodcards.dto.kafka.SmartEventDTO;
-import org.Foodcards.factory.dto.SmartDtoFactory;
 import org.Foodcards.models.AppChangerTrans;
 import org.Foodcards.processor.MessageProcessor;
 import org.Foodcards.processor.ProcessorRegister;
 import org.Foodcards.repository.TransRepository;
-import org.Foodcards.utils.JsonUtil;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.Foodcards.client.ControllerClient;
-import org.Foodcards.dto.internal.ProcedureResult;
-import org.Foodcards.dto.internal.RoutingInfo;
-import org.eclipse.microprofile.reactive.messaging.Message;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped

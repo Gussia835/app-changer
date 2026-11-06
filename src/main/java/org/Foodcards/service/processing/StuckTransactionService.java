@@ -1,4 +1,4 @@
-package org.Foodcards.service;
+package org.Foodcards.service.processing;
 
 import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;

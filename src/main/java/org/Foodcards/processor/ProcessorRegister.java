@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.HashMap;
 import java.util.Map;

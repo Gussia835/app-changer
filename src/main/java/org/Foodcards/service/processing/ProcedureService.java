@@ -1,22 +1,20 @@
-package org.Foodcards.service;
+package org.Foodcards.service.processing;
 
 import io.quarkus.logging.Log;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import oracle.jdbc.OracleConnection;
-import oracle.jdbc.OracleTypeMetaData;
+
 import oracle.jdbc.OracleTypes;
-import oracle.sql.ARRAY;
-import oracle.sql.ArrayDescriptor;
-import oracle.sql.StructDescriptor;
+import org.Foodcards.dto.internal.BalanceChange;
 import org.Foodcards.dto.internal.ProcedureParamsDTO;
 import org.Foodcards.dto.internal.ProcedureResult;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
+@ApplicationScoped
 public class ProcedureService {
 
     @Inject
@@ -40,12 +38,12 @@ public class ProcedureService {
                 int code = statement.getInt(3);
                 String message = statement.getString(4);
 
-                List<ProcedureResult.BalanceChange> changes = new ArrayList<>();
+                List<BalanceChange> changes = new ArrayList<>();
 
                 if (code == 0) {
                     try (ResultSet rs = (ResultSet) statement.getObject(2)) {
                         while (rs.next()) {
-                            ProcedureResult.BalanceChange change = ProcedureResult.BalanceChange.builder()
+                            BalanceChange change = BalanceChange.builder()
                                     .account(rs.getString("ACCOUNT"))
                                     .oldTbal(rs.getString("OLD_TBAL"))
                                     .newTbal(rs.getString("NEW_TBAL"))
@@ -79,21 +77,21 @@ public class ProcedureService {
 
     private void setInCursor(CallableStatement stmt, Connection connection, ProcedureParamsDTO params) throws Exception {
 
-        oracle.jdbc.OracleConnection oracleConnection =
-                connection.unwrap(oracle.jdbc.OracleConnection.class);
+            Struct balanceRecord = connection.createStruct(
+                    "GRU.BALANCE_RECORD",
+                    new Object[] {
+                            params.getSystemAccount(),
+                            params.getOperation(),
+                            new java.math.BigDecimal(params.getAmount()),
+                            params.getCurrency()
+                    }
+            );
 
-        Object[] record = new Object[] {
-                params.getSystemAccount(),
-                params.getOperation(),
-                new java.math.BigDecimal(params.getAmount()),
-                params.getCurrency()
-        };
+            Array balanceTable = connection.createArrayOf(
+                    "GRU.T_BALANCE_TABLE",
+                    new Object[] { balanceRecord }
+            );
 
-        java.sql.Array array = oracleConnection.createOracleArray(
-                "T_BALANCE_TABLE",
-                new Object[] { record }
-        );
-
-        stmt.setArray(1, array);
+            stmt.setArray(1, balanceTable);
     }
 }
