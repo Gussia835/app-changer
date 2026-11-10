@@ -6,7 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.Foodcards.dao.AppChangerDao;
-import org.Foodcards.models.AppChangerTrans;
+import org.Foodcards.models.AppChangerTransEntity;
 import org.Foodcards.repository.TransRepository;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
@@ -31,16 +31,16 @@ public class EgressService {
     @Scheduled(every = "${app.egress.interval:2s}")
     @Transactional
     public void sendResponses() {
-        List<AppChangerTrans> done = transRepo.findDoneTransactions(batchSize);
+        List<AppChangerTransEntity> done = transRepo.findDoneTransactions(batchSize);
 
-        for (AppChangerTrans trans : done) {
+        for (AppChangerTransEntity trans : done) {
             try {
                 kafkaEmitter.send(Message.of(trans.getRespData()));
-                dao.markAsSent(trans.getId());
+                dao.markAsSent(trans.id);
 
-                Log.info("Sent transaction: " + trans.getId());
+                Log.info("Sent transaction: " + trans.id);
             } catch (Exception e) {
-                Log.error("Failed to send transaction: " + trans.getId(), e);
+                Log.error("Failed to send transaction: " + trans.id, e);
                 dao.markTransAsError(trans, e);
             }
 

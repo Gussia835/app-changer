@@ -5,11 +5,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
-import oracle.jdbc.OracleTypes;
 import org.Foodcards.dto.internal.BalanceChange;
 import org.Foodcards.dto.internal.ProcedureParamsDTO;
 import org.Foodcards.dto.internal.ProcedureResult;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,38 +21,44 @@ public class ProcedureService {
     EntityManager entityManager;
 
     public ProcedureResult call(ProcedureParamsDTO params) {
-        try (Connection connection = entityManager.unwrap(Connection.class)) {
 
-            String sql = "{call " + params.getDbConnection() + ".SP_PROCESS_BALANCE(?, ?, ?, ?)}";
+        String sql = "{? = call ACC_APP_CHANGER.sp_process_balance(?, ?, ?, ?)}";
+
+        try (Connection connection = entityManager.unwrap(Connection.class)) {
 
             try (CallableStatement statement = connection.prepareCall(sql)){
 
-                setInCursor(statement, connection, params);
+                statement.registerOutParameter(1, Types.OTHER);
 
-                statement.registerOutParameter(2, OracleTypes.CURSOR);
-                statement.registerOutParameter(3, Types.INTEGER);
-                statement.registerOutParameter(4, Types.VARCHAR);
+                statement.setString(2, params.getSystemAccount());
+                statement.setString(3, params.getOperation());
+                statement.setBigDecimal(4, new BigDecimal(params.getAmount()));
+                statement.setString(5, params.getCurrency());
 
                 statement.execute();
 
-                int code = statement.getInt(3);
-                String message = statement.getString(4);
-
                 List<BalanceChange> changes = new ArrayList<>();
+                int code = 0;
+                String message = null;
 
-                if (code == 0) {
-                    try (ResultSet rs = (ResultSet) statement.getObject(2)) {
-                        while (rs.next()) {
+                try (ResultSet rs = (ResultSet) statement.getObject(1)) {
+                    if (rs.next()) {
+                        code = rs.getInt("out_code");
+                        message = rs.getString("out_message");
+
+                        if (code == 0) {
                             BalanceChange change = BalanceChange.builder()
-                                    .account(rs.getString("ACCOUNT"))
-                                    .oldTbal(rs.getString("OLD_TBAL"))
-                                    .newTbal(rs.getString("NEW_TBAL"))
-                                    .operation(rs.getString("OPERATION"))
-                                    .build();
+                                                    .account(rs.getString("out_account"))
+                                                    .oldTbal(rs.getString("out_old_tbal"))
+                                                    .newTbal(rs.getString("out_new_tbal"))
+                                                    .operation(rs.getString("out_operation"))
+                                                    .build();
+
                             changes.add(change);
                         }
                     }
                 }
+
 
                 return ProcedureResult.builder()
                         .code(code)
@@ -73,25 +79,5 @@ public class ProcedureService {
         }
 
 
-    }
-
-    private void setInCursor(CallableStatement stmt, Connection connection, ProcedureParamsDTO params) throws Exception {
-
-            Struct balanceRecord = connection.createStruct(
-                    "GRU.BALANCE_RECORD",
-                    new Object[] {
-                            params.getSystemAccount(),
-                            params.getOperation(),
-                            new java.math.BigDecimal(params.getAmount()),
-                            params.getCurrency()
-                    }
-            );
-
-            Array balanceTable = connection.createArrayOf(
-                    "GRU.T_BALANCE_TABLE",
-                    new Object[] { balanceRecord }
-            );
-
-            stmt.setArray(1, balanceTable);
     }
 }

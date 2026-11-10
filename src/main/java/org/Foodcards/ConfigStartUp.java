@@ -4,8 +4,7 @@ import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import org.Foodcards.models.AppChangerConfig;
+import org.Foodcards.models.AppChangerConfigEntity;
 import org.Foodcards.processor.MessageProcessor;
 import org.Foodcards.processor.ProcessorRegister;
 import org.Foodcards.repository.ConfigRepository;
@@ -16,8 +15,6 @@ import org.Foodcards.service.ProcessingStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ConfigStartUp {
@@ -31,9 +28,9 @@ public class ConfigStartUp {
 
     void init(@Observes StartupEvent e) {
 
-        List<AppChangerConfig> configs = configRepository.findActiveConfigs();
+        List<AppChangerConfigEntity> configs = configRepository.findActiveConfigs();
 
-        for (AppChangerConfig config : configs) {
+        for (AppChangerConfigEntity config : configs) {
             String streamId = config.getSystemId() + "_" + config.getEventType();
 
             if (config.getStatusIn() != null && config.getStatusIn() == 1) {

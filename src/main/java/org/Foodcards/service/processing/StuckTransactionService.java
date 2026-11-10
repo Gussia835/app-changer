@@ -5,7 +5,7 @@ import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.Foodcards.models.AppChangerTrans;
+import org.Foodcards.models.AppChangerTransEntity;
 import org.Foodcards.repository.TransRepository;
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class StuckTransactionService {
     @Scheduled(every = "${app.stuck-check.interval:5m}")
     @Transactional
     public void resetStuckTransactions() {
-        List<AppChangerTrans> stuck = transRepo.findStuckTransactions(10);
+        List<AppChangerTransEntity> stuck = transRepo.findStuckTransactions(10);
 
         if (stuck.isEmpty()) {
             return;
@@ -30,7 +30,7 @@ public class StuckTransactionService {
 
         Log.warn("Found " + stuck.size() + " stuck transactions, resetting to NEW");
 
-        for (AppChangerTrans trans : stuck) {
+        for (AppChangerTransEntity trans : stuck) {
             trans.setStatus(STATUS_NEW);
             trans.setUpdTs(LocalDateTime.now());
         }

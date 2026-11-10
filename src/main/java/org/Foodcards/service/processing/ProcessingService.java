@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.Foodcards.dao.AppChangerDao;
 import org.Foodcards.dto.entity.TransactionUpdateDTO;
-import org.Foodcards.models.AppChangerTrans;
+import org.Foodcards.models.AppChangerTransEntity;
 import org.Foodcards.processor.MessageProcessor;
 import org.Foodcards.processor.ProcessorRegister;
 import org.Foodcards.repository.TransRepository;
@@ -34,21 +34,21 @@ public class ProcessingService {
     @Transactional
     public void processPending() {
 
-        List<AppChangerTrans> records = transRepository.findNewTransactions(limit);
+        List<AppChangerTransEntity> records = transRepository.findNewTransactions(limit);
 
-        for (AppChangerTrans trans : records) {
+        for (AppChangerTransEntity trans : records) {
             try {
                 dao.markTransProcessing(trans);
 
                 String currSystemId = trans.getSystemId();
                 MessageProcessor currProcessor = processorRegistry.getProcessor(currSystemId);
 
-                TransactionUpdateDTO updateDTO = currProcessor.process(trans.getReqData(), trans.getId());
+                TransactionUpdateDTO updateDTO = currProcessor.process(trans.getReqData(), trans.id);
 
                 dao.updateAfterProcessing(updateDTO);
 
             } catch (Exception e) {
-                Log.error("Failed to process transaction: " + trans.getId(), e);
+                Log.error("Failed to process transaction: " + trans.id, e);
                 dao.markTransAsError(trans, e);
             }
 

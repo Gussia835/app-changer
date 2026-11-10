@@ -1,12 +1,12 @@
 package org.Foodcards.models;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,15 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppChangerIoMsgs {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator = "ioMsgs_seq")
-    @SequenceGenerator(name = "ioMsgs_seq",
-                        sequenceName = "ACC_APP_CHANGER.IO_MSGS_SEQ",
-                        allocationSize = 1)
-    private Long id;
+public class AppChangerIoMsgsEntity extends PanacheEntity {
 
     @Column(name = "TRANS_ID")
     private Long transId;

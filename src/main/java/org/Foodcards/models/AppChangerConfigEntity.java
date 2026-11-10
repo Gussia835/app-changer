@@ -1,5 +1,6 @@
 package org.Foodcards.models;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,14 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppChangerConfig {
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-                    generator = "config_seq")
-    @SequenceGenerator(name = "config_seq",
-                        sequenceName = "ACC_APP_CHANGER.CONFIG_SEQ",
-                        allocationSize = 1)
-    @Id
-    private Long id;
+public class AppChangerConfigEntity extends PanacheEntity {
 
     @Column(name = "SYSTEMID")
     private String systemId;

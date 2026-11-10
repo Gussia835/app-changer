@@ -3,7 +3,7 @@ package org.Foodcards.factory.entity;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.Foodcards.dto.internal.IncomingMessageCommand;
 import org.Foodcards.dto.kafka.GruIncomingDTO;
-import org.Foodcards.models.AppChangerTrans;
+import org.Foodcards.models.AppChangerTransEntity;
 
 import java.time.LocalDateTime;
 
@@ -11,10 +11,10 @@ import static org.Foodcards.utils.Constants.STATUS_NEW;
 
 @ApplicationScoped
 public class TransEntityFactory {
-    public AppChangerTrans buildTrans(IncomingMessageCommand command) {
+    public AppChangerTransEntity buildTrans(IncomingMessageCommand command) {
         GruIncomingDTO dto = command.getPayload();
 
-        return AppChangerTrans.builder()
+        return AppChangerTransEntity.builder()
                 .protocolType(command.getProtocolType())
                 .systemId(dto.getSystemId())
                 .requestId(dto.getRequestId())

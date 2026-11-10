@@ -2,8 +2,8 @@ package org.Foodcards.factory.dto;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.Foodcards.dto.entity.IoLogDTO;
-import org.Foodcards.models.AppChangerIoMsgs;
-import org.Foodcards.models.AppChangerTrans;
+import org.Foodcards.models.AppChangerIoMsgsEntity;
+import org.Foodcards.models.AppChangerTransEntity;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +11,9 @@ import static org.Foodcards.utils.Constants.*;
 
 @ApplicationScoped
 public class IoMsgsDtoFactory {
-    public IoLogDTO buildIoLog(AppChangerTrans trans, String json, String nodeId) {
+    public IoLogDTO buildIoLog(AppChangerTransEntity trans, String json, String nodeId) {
         return IoLogDTO.builder()
-                .transId(trans.getId())
+                .transId(trans.id)
                 .protocolType(trans.getProtocolType())
                 .msgType(trans.getSystemId())
                 .dir(DIR_IN)
@@ -22,9 +22,9 @@ public class IoMsgsDtoFactory {
                 .build();
     }
 
-    public AppChangerIoMsgs buildOutLog(AppChangerTrans trans, String nodeId) {
-        return AppChangerIoMsgs.builder()
-                .transId(trans.getId())
+    public AppChangerIoMsgsEntity buildOutLog(AppChangerTransEntity trans, String nodeId) {
+        return AppChangerIoMsgsEntity.builder()
+                .transId(trans.id)
                 .protocolType(trans.getProtocolType())
                 .msgType(SYSTEM_SMART)
                 .dir(DIR_OUT)

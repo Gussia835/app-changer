@@ -1,11 +1,11 @@
 package org.Foodcards.service;
 
 import org.Foodcards.dto.kafka.GruIncomingDTO;
-import org.Foodcards.models.AppChangerConfig;
+import org.Foodcards.models.AppChangerConfigEntity;
 
 public interface ProcessingStream {
     String getStreamId();
-    AppChangerConfig getConfig();
+    AppChangerConfigEntity getConfig();
     void start();
     void stop();
     boolean isRunning();

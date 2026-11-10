@@ -4,13 +4,13 @@ import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import org.Foodcards.dto.kafka.GruIncomingDTO;
-import org.Foodcards.models.AppChangerConfig;
+import org.Foodcards.models.AppChangerConfigEntity;
 import org.Foodcards.service.in.IngestionService;
 
 @RequiredArgsConstructor
 public class KafkaProcessingStream implements ProcessingStream {
 
-    private final AppChangerConfig config;
+    private final AppChangerConfigEntity config;
 
     @Inject
     private IngestionService ingestionService;
@@ -23,7 +23,7 @@ public class KafkaProcessingStream implements ProcessingStream {
     }
 
     @Override
-    public AppChangerConfig getConfig() {
+    public AppChangerConfigEntity getConfig() {
         return config;
     }
 

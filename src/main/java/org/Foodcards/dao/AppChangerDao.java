@@ -10,8 +10,8 @@ import org.Foodcards.dto.entity.TransactionUpdateDTO;
 import org.Foodcards.factory.dto.IoMsgsDtoFactory;
 import org.Foodcards.factory.entity.IoMsgsFactory;
 import org.Foodcards.factory.entity.TransEntityFactory;
-import org.Foodcards.models.AppChangerIoMsgs;
-import org.Foodcards.models.AppChangerTrans;
+import org.Foodcards.models.AppChangerIoMsgsEntity;
+import org.Foodcards.models.AppChangerTransEntity;
 import org.Foodcards.repository.IoMsgsRepository;
 import org.Foodcards.repository.TransRepository;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -39,11 +39,11 @@ public class AppChangerDao {
      */
     @Transactional
     public void saveIncomning(IncomingMessageCommand command) {
-        AppChangerTrans trans = transFactory.buildTrans(command);
+        AppChangerTransEntity trans = transFactory.buildTrans(command);
         transRepository.save(trans);
 
         IoLogDTO logDto = ioMsgsDtoFactory.buildIoLog(trans, command.getRawJson(), nodeId);
-        AppChangerIoMsgs ioMsg = ioMsgsFactory.buildIoMsg(logDto);
+        AppChangerIoMsgsEntity ioMsg = ioMsgsFactory.buildIoMsg(logDto);
         ioMsgsRepository.save(ioMsg);
     }
 
@@ -52,7 +52,7 @@ public class AppChangerDao {
      */
     @Transactional
     public void updateAfterProcessing(TransactionUpdateDTO dto) {
-        AppChangerTrans trans = transRepository.findById(dto.getTransId());
+        AppChangerTransEntity trans = transRepository.findById(dto.getTransId());
 
         if (trans == null) {
             throw new IllegalArgumentException("Transaction not found: " + dto.getTransId());
@@ -68,7 +68,7 @@ public class AppChangerDao {
     Даем статус Progress записям
      */
     @Transactional
-    public void markTransProcessing(AppChangerTrans trans) {
+    public void markTransProcessing(AppChangerTransEntity trans) {
         trans.setStatus(STATUS_PROCESSING);
         transRepository.getEntityManager().merge(trans);
         transRepository.getEntityManager().flush();
@@ -77,7 +77,7 @@ public class AppChangerDao {
 
     @Transactional
     public void markAsSent(Long transId) {
-        AppChangerTrans trans = transRepository.findById(transId);
+        AppChangerTransEntity trans = transRepository.findById(transId);
 
         if (trans == null) {
             throw new IllegalArgumentException("Transaction not found: " + transId);
@@ -86,8 +86,8 @@ public class AppChangerDao {
         trans.setStatus(STATUS_SENT);
         trans.setUpdTs(LocalDateTime.now());
 
-        AppChangerIoMsgs ioMsg = AppChangerIoMsgs.builder()
-                .transId(trans.getId())
+        AppChangerIoMsgsEntity ioMsg = AppChangerIoMsgsEntity.builder()
+                .transId(trans.id)
                 .protocolType(trans.getProtocolType())
                 .msgType("SMART")
                 .dir(DIR_OUT)
@@ -103,7 +103,7 @@ public class AppChangerDao {
     Пометить ошибкой
      */
     @Transactional
-    public void markTransAsError(AppChangerTrans trans, Exception e) {
+    public void markTransAsError(AppChangerTransEntity trans, Exception e) {
         trans.setStatus(STATUS_ERROR);
         trans.setRespDesc(e.getMessage());
         transRepository.getEntityManager().merge(trans);
