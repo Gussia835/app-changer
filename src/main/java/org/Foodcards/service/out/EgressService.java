@@ -3,11 +3,13 @@ package org.Foodcards.service.out;
 import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.Foodcards.dao.AppChangerDao;
 import org.Foodcards.models.AppChangerTransEntity;
 import org.Foodcards.repository.TransRepository;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
@@ -24,6 +26,9 @@ public class EgressService {
 
     @Channel("smart-output")
     Emitter<String> kafkaEmitter;
+
+    @Inject
+    KafkaProducer<String, String> kafkaProducer;
 
     @ConfigProperty(name = "app.egress.batch-size", defaultValue = "50")
     int batchSize;

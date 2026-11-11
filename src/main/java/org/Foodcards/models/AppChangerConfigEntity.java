@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "APP_CHANGER_CONFIG", schema = "ACC_APP_CHANGER")
+@Table(name = "app_changer_config", schema = "acc_app_changer")
 @Data
 @Builder
 @NoArgsConstructor
@@ -46,4 +46,12 @@ public class AppChangerConfigEntity extends PanacheEntity {
 
     @Column(name = "UPD_TS")
     private LocalDateTime updTs;
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getStreamId() {
+        return this.systemId + "_" + this.eventType;
+    }
 }

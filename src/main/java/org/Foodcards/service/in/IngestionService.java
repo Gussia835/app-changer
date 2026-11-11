@@ -28,4 +28,16 @@ public class IngestionService {
             throw new RuntimeException("Ошибка сохранения в БД", e);
         }
     }
+
+    @Transactional
+    public void processFromKafka(String rawJson) {
+        try {
+            GruIncomingDTO dto = jsonUtil.fromJson(rawJson, GruIncomingDTO.class);
+            IncomingMessageCommand command = transDtoFactory.buildIncomingMessage(rawJson, dto);
+            dao.saveIncomning(command);
+        } catch (Exception e) {
+            Log.errorf("Не удалось сохранить сообщение из Kafka: %s", rawJson, e);
+            throw new RuntimeException("Ошибка сохранения в БД", e);
+        }
+    }
 }

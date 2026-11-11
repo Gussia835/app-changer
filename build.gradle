@@ -29,7 +29,10 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.30'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
     testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
+    testImplementation 'net.datafaker:datafaker:2.1.0'
     testImplementation 'io.rest-assured:rest-assured'
+
 }
 
 group = 'org.Foodcards'

@@ -31,10 +31,10 @@ public class AppChangerTransEntity extends PanacheEntity {
     @Column(name = "EVENT_TYPE")
     private String eventType;
 
-    @Column(name = "RESP_DATA", columnDefinition = "CLOB")
+    @Column(name = "RESP_DATA", columnDefinition = "TEXT")
     private String respData;
 
-    @Column(name = "REQ_DATA", columnDefinition = "CLOB", nullable = false)
+    @Column(name = "REQ_DATA", columnDefinition = "TEXT", nullable = false)
     private String reqData;
 
     @Column(name = "STATUS", nullable = false)
@@ -54,5 +54,7 @@ public class AppChangerTransEntity extends PanacheEntity {
     @Column(name = "UPD_TS")
     private LocalDateTime updTs;
 
-
+    public Long getId() {
+        return this.id;
+    }
 }

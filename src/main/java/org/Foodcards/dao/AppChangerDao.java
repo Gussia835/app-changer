@@ -87,7 +87,7 @@ public class AppChangerDao {
         trans.setUpdTs(LocalDateTime.now());
 
         AppChangerIoMsgsEntity ioMsg = AppChangerIoMsgsEntity.builder()
-                .transId(trans.id)
+                .transId(trans.getId())
                 .protocolType(trans.getProtocolType())
                 .msgType("SMART")
                 .dir(DIR_OUT)

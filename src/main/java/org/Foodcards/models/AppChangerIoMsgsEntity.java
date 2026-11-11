@@ -37,4 +37,8 @@ public class AppChangerIoMsgsEntity extends PanacheEntity {
 
     @Column(name = "NODE_ID")
     private String nodeId;
+
+    public Long getId() {
+        return this.id;
+    }
 }

@@ -13,7 +13,7 @@ import static org.Foodcards.utils.Constants.*;
 public class IoMsgsDtoFactory {
     public IoLogDTO buildIoLog(AppChangerTransEntity trans, String json, String nodeId) {
         return IoLogDTO.builder()
-                .transId(trans.id)
+                .transId(trans.getId())
                 .protocolType(trans.getProtocolType())
                 .msgType(trans.getSystemId())
                 .dir(DIR_IN)
@@ -24,7 +24,7 @@ public class IoMsgsDtoFactory {
 
     public AppChangerIoMsgsEntity buildOutLog(AppChangerTransEntity trans, String nodeId) {
         return AppChangerIoMsgsEntity.builder()
-                .transId(trans.id)
+                .transId(trans.getId())
                 .protocolType(trans.getProtocolType())
                 .msgType(SYSTEM_SMART)
                 .dir(DIR_OUT)
