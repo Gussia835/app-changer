@@ -2,40 +2,37 @@ package org.Foodcards.models;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "APP_CHANGER_IO_MSGS", schema = "ACC_APP_CHANGER")
+@Table(name = "app_changer_io_msgs", schema = "acc_app_changer")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppChangerIoMsgsEntity extends PanacheEntity {
 
-    @Column(name = "TRANS_ID")
+    @Column(name = "trans_id")
     private Long transId;
 
-    @Column(name = "PROTOCOL_TYPE")
+    @Column(name = "protocol_type")
     private String protocolType;
 
-    @Column(name = "MSG_TYPE")
+    @Column(name = "msg_type")
     private String msgType;
 
-    @Column(name = "DIR")
+    @Column(name = "dir")
     private String dir;
 
-    @Column(name = "MSG")
+    @Column(name = "msg")
     private String msg;
 
-    @Column(name = "INS_TS")
+    @Column(name = "ins_ts")
     private LocalDateTime insTs;
 
-    @Column(name = "NODE_ID")
+    @Column(name = "node_id")
     private String nodeId;
 
     public Long getId() {

@@ -12,46 +12,46 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "APP_CHANGER_TRANS", schema = "ACC_APP_CHANGER")
+@Table(name = "app_changer_trans", schema = "acc_app_changer")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppChangerTransEntity extends PanacheEntity {
 
-    @Column(name = "PROTOCOL_TYPE")
+    @Column(name = "protocol_type")
     public String protocolType;
 
-    @Column(name = "SYSTEM_ID")
+    @Column(name = "system_id")
     private String systemId;
 
-    @Column(name = "REQUEST_ID ")
+    @Column(name = "request_id ")
     private String requestId;
 
-    @Column(name = "EVENT_TYPE")
+    @Column(name = "event_type")
     private String eventType;
 
-    @Column(name = "RESP_DATA", columnDefinition = "TEXT")
+    @Column(name = "resp_data", columnDefinition = "TEXT")
     private String respData;
 
-    @Column(name = "REQ_DATA", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "req_data", columnDefinition = "TEXT", nullable = false)
     private String reqData;
 
-    @Column(name = "STATUS", nullable = false)
+    @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "RESP_CODE")
+    @Column(name = "resp_code")
     private String respCode;
 
-    @Column(name = "RESP_DESC")
+    @Column(name = "resp_desc")
     private String respDesc;
 
     @CreationTimestamp
-    @Column(name = "INS_TS")
+    @Column(name = "ins_ts")
     private LocalDateTime insTs;
 
     @UpdateTimestamp
-    @Column(name = "UPD_TS")
+    @Column(name = "upd_ts")
     private LocalDateTime updTs;
 
     public Long getId() {

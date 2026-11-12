@@ -14,7 +14,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest-jackson'
     implementation 'io.quarkus:quarkus-rest-client-jackson'
 
-    implementation 'io.quarkus:quarkus-messaging-kafka'
+    implementation 'io.quarkus:quarkus-kafka-client'
 
     implementation 'io.quarkus:quarkus-agroal'
     implementation 'io.quarkus:quarkus-jdbc-postgresql'

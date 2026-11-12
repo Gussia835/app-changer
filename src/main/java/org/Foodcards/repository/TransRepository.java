@@ -35,15 +35,10 @@ public class TransRepository implements PanacheRepository<AppChangerTransEntity>
                 .list();
     }
 
-    public List<AppChangerTransEntity> findStuckTransactions(int minutes) {
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(minutes);
-        return getEntityManager()
-                .createQuery(
-                        "SELECT t FROM AppChangerTrans t WHERE t.status = :status AND t.updTs < :threshold",
-                        AppChangerTransEntity.class
-                )
-                .setParameter("status", STATUS_PROCESSING)
-                .setParameter("threshold", threshold)
-                .getResultList();
+    public List<AppChangerTransEntity> findStuckTransactions(int limit) {
+        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
+        return find("status = ?1 and updTs < ?2", "PROCESSING", fiveMinutesAgo)
+                .page(0, limit)
+                .list();
     }
 }

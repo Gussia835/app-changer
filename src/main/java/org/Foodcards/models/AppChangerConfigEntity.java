@@ -2,10 +2,7 @@ package org.Foodcards.models;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -17,34 +14,34 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AppChangerConfigEntity extends PanacheEntity {
 
-    @Column(name = "SYSTEMID")
+    @Column(name = "system_id")
     private String systemId;
 
-    @Column(name = "EVENT_TYPE")
+    @Column(name = "event_type")
     private String eventType;
 
-    @Column(name = "ENTITY_TYPE")
+    @Column(name = "entity_type")
     private String entityType;
 
-    @Column(name = "PROTOCOL_TYPE")
+    @Column(name = "protocol_type")
     private String protocolType;
 
-    @Column(name = "PROTOCOL_IN")
+    @Column(name = "protocol_in")
     private String protocolIn;
 
-    @Column(name = "STATUS_IN")
+    @Column(name = "status_in")
     private Integer statusIn;
 
-    @Column(name = "PROTOCOL_OUT")
+    @Column(name = "protocol_out")
     private String protocolOut;
 
-    @Column(name = "STATUS_OUT")
+    @Column(name = "status_out")
     private Integer statusOut;
 
-    @Column(name = "INS_TS")
+    @Column(name = "ins_ts")
     private LocalDateTime insTs;
 
-    @Column(name = "UPD_TS")
+    @Column(name = "upd_ts")
     private LocalDateTime updTs;
 
     public Long getId() {

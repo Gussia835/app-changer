@@ -1,6 +1,7 @@
 package org.Foodcards.service;
 
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.annotation.PreDestroy;
@@ -151,9 +152,8 @@ public class StreamManager {
         return lastUnderscore > 0 ? taskId.substring(0, lastUnderscore) : taskId;
     }
 
-    @PreDestroy
-    public void shutdown(@Observes io.quarkus.runtime.ShutdownEvent e) {
-        Log.info("Грейсфул остановка всех динамических потоков...");
+    public void shutdown(@Observes ShutdownEvent e) {
+        Log.info("остановка всех динамических потоков...");
         activeTasks.keySet().forEach(this::stopTask);
     }
 }
