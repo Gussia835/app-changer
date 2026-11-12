@@ -22,4 +22,8 @@ public class ConfigRepository implements PanacheRepository<AppChangerConfigEntit
     public void saveOrUpdate(AppChangerConfigEntity config) {
         persist(config);
     }
+
+    public AppChangerConfigEntity findBySystemIdAndEvent(String systemId, String eventType) {
+        return find("systemId = ?1 and eventType = ?2", systemId, eventType).firstResult();
+    }
 }

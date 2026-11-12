@@ -57,4 +57,8 @@ public class AppChangerTransEntity extends PanacheEntity {
     public Long getId() {
         return this.id;
     }
+
+    public String getStreamId() {
+        return this.systemId + "_" + this.eventType;
+    }
 }

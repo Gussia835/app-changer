@@ -39,7 +39,7 @@ public class AppChangerConfigEntity extends PanacheEntity {
     private String protocolOut;
 
     @Column(name = "STATUS_OUT")
-    private String statusOut;
+    private Integer statusOut;
 
     @Column(name = "INS_TS")
     private LocalDateTime insTs;

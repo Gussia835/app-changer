@@ -1,6 +1,7 @@
 package org.Foodcards.service;
 
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 @ApplicationScoped
-public class DynamicStreamManager {
+public class StreamManager {
 
     @Inject
     ConfigRepository configRepository;
@@ -37,12 +38,12 @@ public class DynamicStreamManager {
     ManagedExecutor executor;
 
     @Inject
-    KafkaConfig appConfig;
+    KafkaConfig kafkaConfig;
 
     private final ConcurrentHashMap<String, Future<?>> activeTasks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>();
 
-    public void init(@Observes io.quarkus.runtime.StartupEvent e) {
+    public void init(@Observes StartupEvent e) {
         Log.info("Инициализация DynamicStreamManager");
         syncStreams();
     }
@@ -51,38 +52,61 @@ public class DynamicStreamManager {
     public void syncStreams() {
         List<AppChangerConfigEntity> configs = configRepository.findActiveConfigs();
 
-        activeTasks.keySet().forEach(streamId -> {
+        activeTasks.keySet().forEach(taskId -> {
+            String streamId = extractStreamId(taskId);
+
             boolean isActive = configs.stream()
-                    .anyMatch(c -> c.getStreamId().equals(streamId) && c.getStatusIn() == 1);
+                            .anyMatch(c -> c.getStreamId().equals(streamId) && c.getStatusIn() == 1);
+
             if (!isActive) {
-                stopStream(streamId);
+                stopTask(taskId);
             }
         });
 
-        configs.stream()
-                .filter(c -> c.getStatusIn() == 1)
-                .filter(c -> !activeTasks.containsKey(c.getStreamId()))
-                .forEach(this::startStream);
+        for (AppChangerConfigEntity config : configs) {
+            if (config.getStatusIn() == 1) {
+                String streamId = config.getStreamId();
+
+                String configKey = streamId.toLowerCase().replace("_", "-");
+
+                int requiredThreads = kafkaConfig.concurrency().getOrDefault(configKey,
+                                                kafkaConfig.concurrency().getOrDefault("default", 1));
+
+                long currThreads = activeTasks.keySet().stream()
+                        .filter(id -> id.startsWith(streamId + "_thread_")).count();
+
+                for (int i = (int) currThreads; i < requiredThreads; ++i) {
+                    startConsumerThread(config, i);
+                }
+            }
+        }
     }
 
-    private void startStream(AppChangerConfigEntity config) {
+    private void startConsumerThread(AppChangerConfigEntity config, int threadIndex) {
         String streamId = config.getStreamId();
-        Log.infof("Запуск Consumer для потока: %s (Топик: %s)", streamId, config.getProtocolIn());
+        String taskId = streamId + "_thread_" + threadIndex;
+
+        Log.infof("Запуск Consumer #%d для потока: %s (Топик: %s)",
+                threadIndex + 1, streamId, config.getProtocolIn());
 
         KafkaConsumer<String, String> consumer = createConsumer(config);
-        consumers.put(streamId, consumer);
+        consumers.put(taskId, consumer);
 
-        Future<?> task = executor.submit(() -> runConsumerLoop(streamId, consumer));
-        activeTasks.put(streamId, task);
+        Future<?> task = executor.submit(() -> runConsumerLoop(taskId, consumer));
+        activeTasks.put(taskId, task);
     }
 
     private KafkaConsumer<String, String> createConsumer(AppChangerConfigEntity config) {
         Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, appConfig.bootstrapServers());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, appConfig.groupIdPrefix() + "-" + config.getSystemId());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfig.bootstrapServers());
+
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConfig.groupIdPrefix() + "-" + config.getSystemId() + "-" + config.getEventType());
+
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, appConfig.autoOffsetReset());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaConfig.autoOffsetReset());
+
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "500");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Collections.singletonList(config.getProtocolIn()));
@@ -94,7 +118,7 @@ public class DynamicStreamManager {
 
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(appConfig.pollTimeoutMs()));
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(kafkaConfig.pollTimeoutMs()));
                 for (ConsumerRecord<String, String> record : records) {
                     try {
                         ingestionService.processFromKafka(record.value());
@@ -109,22 +133,27 @@ public class DynamicStreamManager {
         }
     }
 
-    private void stopStream(String streamId) {
-        Log.infof("Остановка потока: %s", streamId);
+    private void stopTask(String taskId) {
+        Log.infof("Остановка задачи: %s", taskId);
 
-        Future<?> task = activeTasks.remove(streamId);
+        Future<?> task = activeTasks.remove(taskId);
         if (task != null) task.cancel(true);
 
-        KafkaConsumer<String, String> consumer = consumers.remove(streamId);
+        KafkaConsumer<String, String> consumer = consumers.remove(taskId);
         if (consumer != null) {
             consumer.wakeup();
             consumer.close();
         }
     }
 
+    private String extractStreamId(String taskId) {
+        int lastUnderscore = taskId.lastIndexOf("_thread_");
+        return lastUnderscore > 0 ? taskId.substring(0, lastUnderscore) : taskId;
+    }
+
     @PreDestroy
     public void shutdown(@Observes io.quarkus.runtime.ShutdownEvent e) {
         Log.info("Грейсфул остановка всех динамических потоков...");
-        activeTasks.keySet().forEach(this::stopStream);
+        activeTasks.keySet().forEach(this::stopTask);
     }
 }

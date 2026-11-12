@@ -4,6 +4,8 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 import lombok.Getter;
 
+import java.util.Map;
+
 @ConfigMapping(prefix = "app.kafka")
 public interface KafkaConfig {
 
@@ -18,4 +20,6 @@ public interface KafkaConfig {
 
     @WithDefault("100")
     int pollTimeoutMs();
+
+    Map<String, Integer> concurrency();
 }
