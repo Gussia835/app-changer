@@ -138,12 +138,25 @@ public class StreamManager {
         Log.infof("Остановка задачи: %s", taskId);
 
         Future<?> task = activeTasks.remove(taskId);
-        if (task != null) task.cancel(true);
+        if (task != null) {
+
+            task.cancel(true);
+        }
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         KafkaConsumer<String, String> consumer = consumers.remove(taskId);
         if (consumer != null) {
-            consumer.wakeup();
-            consumer.close();
+            try {
+                consumer.close();
+                Log.infof("Consumer для %s успешно закрыт", taskId);
+            } catch (Exception e) {
+                Log.warnf("Предупреждение при закрытии Consumer %s: %s", taskId, e.getMessage());
+            }
         }
     }
 

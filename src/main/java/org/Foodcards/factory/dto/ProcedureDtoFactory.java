@@ -40,7 +40,7 @@ public class ProcedureDtoFactory {
         return ProcedureParamsDTO.builder()
                 .systemAccount(event.getSystemAccount())
                 .operation(event.getOperation())
-                .xalpha(event.getXalfa())
+                .amount(event.getXalfa())
                 .currency(event.getCurrency())
                 .dbConnection(routing.getDbConnection())
                 .build();

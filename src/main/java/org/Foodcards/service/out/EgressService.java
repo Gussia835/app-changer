@@ -5,6 +5,7 @@ import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 import lombok.RequiredArgsConstructor;
 import org.Foodcards.dao.AppChangerDao;
 import org.Foodcards.models.AppChangerConfigEntity;
@@ -20,14 +21,14 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
+
 @ApplicationScoped
 @RequiredArgsConstructor
 public class EgressService {
 
     private final TransRepository transRepo;
     private final AppChangerDao dao;
-
-    @Inject
     private final ConfigRepository configRepository;
 
     @Inject
@@ -40,7 +41,6 @@ public class EgressService {
     int batchSize;
 
     @Scheduled(every = "${app.egress.interval:2s}")
-    @Transactional
     public void sendResponses() {
         List<AppChangerTransEntity> done = transRepo.findDoneTransactions(batchSize);
 
@@ -59,7 +59,8 @@ public class EgressService {
         Log.info("Пакет отправки завершен.");
     }
 
-    private void processTrans(AppChangerTransEntity trans) {
+    @Transactional(TxType.REQUIRES_NEW)
+    public void processTrans(AppChangerTransEntity trans) {
         try {
             AppChangerConfigEntity config = configRepository.findBySystemIdAndEvent(trans.getSystemId(), trans.getEventType());
 
@@ -69,16 +70,11 @@ public class EgressService {
             }
 
             ProducerRecord<String, String> proudcerRecord = new ProducerRecord<>(config.getProtocolOut(), trans.getRespData());
+            RecordMetadata metadata = kafkaProducer.send(proudcerRecord).get();
 
-            kafkaProducer.send(proudcerRecord, (RecordMetadata recordMetaData, Exception ex) -> {
-                if (ex != null) {
-                    Log.errorf("Ошибка отправки TransID: %d", trans.getId(), ex);
-                    dao.markTransAsError(trans, ex);
-                } else {
-                    Log.infof("Отправлено TransID: %d в топик: %s", trans.getId(), config.getProtocolOut());
-                    dao.markAsSent(trans.getId());
-                }
-            });
+            Log.infof("успешно отправлено TransID: %d в топик: %s", trans.getId(), config.getProtocolOut());
+
+            dao.markAsSent(trans.getId());
 
         } catch (Exception e) {
             Log.errorf("Ошибка отправки TransID: %d", trans.getId(), e);

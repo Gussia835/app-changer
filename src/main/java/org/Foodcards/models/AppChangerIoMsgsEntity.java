@@ -1,6 +1,7 @@
 package org.Foodcards.models;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppChangerIoMsgsEntity extends PanacheEntity {
+public class AppChangerIoMsgsEntity extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     @Column(name = "trans_id")
     private Long transId;
@@ -35,7 +40,4 @@ public class AppChangerIoMsgsEntity extends PanacheEntity {
     @Column(name = "node_id")
     private String nodeId;
 
-    public Long getId() {
-        return this.id;
-    }
 }

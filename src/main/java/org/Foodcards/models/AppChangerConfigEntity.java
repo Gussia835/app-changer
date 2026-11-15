@@ -1,6 +1,7 @@
 package org.Foodcards.models;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppChangerConfigEntity extends PanacheEntity {
+public class AppChangerConfigEntity extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     @Column(name = "system_id")
     private String systemId;
@@ -43,10 +48,6 @@ public class AppChangerConfigEntity extends PanacheEntity {
 
     @Column(name = "upd_ts")
     private LocalDateTime updTs;
-
-    public Long getId() {
-        return this.id;
-    }
 
     public String getStreamId() {
         return this.systemId + "_" + this.eventType;

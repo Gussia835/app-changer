@@ -27,7 +27,6 @@ public class GruMessageProcessor implements MessageProcessor {
     JsonUtil jsonUtil;
 
     @Inject
-    @RestClient
     ControllerClient appController;
 
     @Inject

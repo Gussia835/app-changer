@@ -4,13 +4,12 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-
+import jakarta.transaction.Transactional;
 import org.Foodcards.dto.internal.BalanceChange;
 import org.Foodcards.dto.internal.ProcedureParamsDTO;
 import org.Foodcards.dto.internal.ProcedureResult;
 
 import java.math.BigDecimal;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,64 +19,54 @@ public class ProcedureService {
     @Inject
     EntityManager entityManager;
 
+    @Transactional
     public ProcedureResult call(ProcedureParamsDTO params) {
+        ProcedureResult result = new ProcedureResult();
+        result.setChanges(new ArrayList<>());
 
-        String sql = "{? = call ACC_APP_CHANGER.sp_process_balance(?, ?, ?, ?)}";
-
-        try (Connection connection = entityManager.unwrap(Connection.class)) {
-
-            try (CallableStatement statement = connection.prepareCall(sql)){
-
-                statement.registerOutParameter(1, Types.OTHER);
-
-                statement.setString(2, params.getSystemAccount());
-                statement.setString(3, params.getOperation());
-                statement.setBigDecimal(4, new BigDecimal(params.getAmount()));
-                statement.setString(5, params.getCurrency());
-
-                statement.execute();
-
-                List<BalanceChange> changes = new ArrayList<>();
-                int code = 0;
-                String message = null;
-
-                try (ResultSet rs = (ResultSet) statement.getObject(1)) {
-                    if (rs.next()) {
-                        code = rs.getInt("out_code");
-                        message = rs.getString("out_message");
-
-                        if (code == 0) {
-                            BalanceChange change = BalanceChange.builder()
-                                                    .account(rs.getString("out_account"))
-                                                    .oldTbal(rs.getString("out_old_tbal"))
-                                                    .newTbal(rs.getString("out_new_tbal"))
-                                                    .operation(rs.getString("out_operation"))
-                                                    .build();
-
-                            changes.add(change);
-                        }
-                    }
-                }
-
-
-                return ProcedureResult.builder()
-                        .code(code)
-                        .message(message)
-                        .changes(changes)
-                        .build();
-
+        try {
+            String amountStr = params.getAmount();
+            if (amountStr == null || amountStr.trim().isEmpty()) {
+                amountStr = "0";
             }
 
+            String sql = "SELECT * FROM acc_app_changer.sp_process_balance(:p_system_account, :p_operation, CAST(:p_amount AS NUMERIC), :p_currency)";
+
+            List<Object[]> rows = entityManager.createNativeQuery(sql)
+                    .setParameter("p_system_account", params.getSystemAccount())
+                    .setParameter("p_operation", params.getOperation())
+                    .setParameter("p_amount", new BigDecimal(amountStr))
+                    .setParameter("p_currency", params.getCurrency())
+                    .getResultList();
+
+            if (rows != null && !rows.isEmpty()) {
+                Object[] row = rows.get(0);
+
+                Integer code = row[4] != null ? ((Number) row[4]).intValue() : -1;
+                String message = row[5] != null ? row[5].toString() : null;
+
+                result.setCode(code);
+                result.setMessage(message);
+
+                if (code == 0) {
+                    BalanceChange change = new BalanceChange();
+                    change.setAccount(row[0] != null ? row[0].toString() : null);
+                    change.setOldTbal(row[1] != null ? row[1].toString() : null);
+                    change.setNewTbal(row[2] != null ? row[2].toString() : null);
+                    change.setOperation(row[3] != null ? row[3].toString() : null);
+                    result.getChanges().add(change);
+                }
+            } else {
+                result.setCode(-1);
+                result.setMessage("Функция не вернула результатов");
+            }
 
         } catch (Exception e) {
-            Log.error("Failed to call database procedure for account: " + params.getSystemAccount(), e);
-            return ProcedureResult.builder()
-                    .code(-1)
-                    .message("Database error: " + e.getMessage())
-                    .changes(new ArrayList<>())
-                    .build();
+            Log.errorf(e, "Критическая ошибка вызова процедуры для account %s", params.getSystemAccount());
+            result.setCode(-1);
+            result.setMessage("Database execution error: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
         }
 
-
+        return result;
     }
 }

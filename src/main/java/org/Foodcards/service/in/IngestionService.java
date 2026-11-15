@@ -36,8 +36,8 @@ public class IngestionService {
             IncomingMessageCommand command = transDtoFactory.buildIncomingMessage(rawJson, dto);
             dao.saveIncomning(command);
         } catch (Exception e) {
-            Log.errorf("Не удалось сохранить сообщение из Kafka: %s", rawJson, e);
-            throw new RuntimeException("Ошибка сохранения в БД", e);
+            Log.error("Не удалось сохранить сообщение", e);
+            throw new RuntimeException("Ошибка сохранения в БД: " + e.getMessage(), e);
         }
     }
 }

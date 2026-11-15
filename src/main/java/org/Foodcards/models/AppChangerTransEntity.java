@@ -1,6 +1,7 @@
 package org.Foodcards.models;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppChangerTransEntity extends PanacheEntity {
+public class AppChangerTransEntity extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     @Column(name = "protocol_type")
     public String protocolType;
@@ -25,7 +30,7 @@ public class AppChangerTransEntity extends PanacheEntity {
     @Column(name = "system_id")
     private String systemId;
 
-    @Column(name = "request_id ")
+    @Column(name = "request_id")
     private String requestId;
 
     @Column(name = "event_type")
@@ -53,10 +58,6 @@ public class AppChangerTransEntity extends PanacheEntity {
     @UpdateTimestamp
     @Column(name = "upd_ts")
     private LocalDateTime updTs;
-
-    public Long getId() {
-        return this.id;
-    }
 
     public String getStreamId() {
         return this.systemId + "_" + this.eventType;

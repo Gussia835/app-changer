@@ -1,5 +1,6 @@
 package org.Foodcards.dto.kafka;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@RegisterForReflection
 public class GruIncomingDTO {
     private String actualTimestamp;
     private String systemId;

@@ -13,7 +13,6 @@ public class ProcedureParamsDTO {
     String systemAccount;
     String operation;
     String amount;
-    String xalpha;
     String currency;
     String dbConnection;
 }
